@@ -1015,48 +1015,48 @@ function renderProfile(){
 
 // ── State ─────────────────────────────────────────────────────────
 let anchorMood = null;
-let anchorStep = 0;   // 0=mood pick, 1=after opening, 2=after dig1, 3=after dig2, 4=journal, 5=done
+let anchorStep = 0;
 let anchorInputEnabled = false;
 
 // ── Mood routing from "other" ──────────────────────────────────────
 function anchorDetectMood(text){
   const t = text.toLowerCase();
   const signals = {
-    anxious:     ['worried','worry','scared','fear','nervous','stress','panic','overwhelm','what if','dread','uncertain','afraid'],
-    discouraged: ['tired','exhausted','gave up','giving up','hopeless','no point','empty','beaten','cant do','failing','failure','not enough','worthless'],
-    frustrated:  ['angry','mad','unfair','wrong','hurt','betrayed','disrespected','didnt','not fair','upset','annoyed','resentful'],
-    lost:        ['dont know','confused','no direction','what to do','where to go','stuck','which way','unclear','lost','cant decide'],
-    grateful:    ['thankful','grateful','blessed','good news','happy','joy','excited','praise','appreciate','gift'],
-    strong:      ['ready','clear','focused','confident','motivated','energized','good place','grounded','strong','purposeful'],
+    anxious:     ["worried","worry","scared","fear","nervous","stress","panic","overwhelm","what if","dread","uncertain","afraid"],
+    discouraged: ["tired","exhausted","gave up","giving up","hopeless","no point","empty","beaten","cant do","failing","failure","not enough","worthless"],
+    frustrated:  ["angry","mad","unfair","wrong","hurt","betrayed","disrespected","didnt","not fair","upset","annoyed","resentful"],
+    lost:        ["dont know","confused","no direction","what to do","where to go","stuck","which way","unclear","lost","cant decide"],
+    grateful:    ["thankful","grateful","blessed","good news","happy","joy","excited","praise","appreciate","gift"],
+    strong:      ["ready","clear","focused","confident","motivated","energized","good place","grounded","strong","purposeful"],
   };
   const scores = {};
   for(const [mood,words] of Object.entries(signals)){
     scores[mood] = words.filter(w=>t.includes(w)).length;
   }
   const best = Object.entries(scores).sort((a,b)=>b[1]-a[1])[0];
-  return best[1] > 0 ? best[0] : 'discouraged';
+  return best[1] > 0 ? best[0] : "discouraged";
 }
 
 // ── Echo helper ────────────────────────────────────────────────────
 function anchorEcho(text, fallback){
   const t = text.trim();
   if(t.length < 6) return fallback;
-  if(t.length <= 60) return `"${t}"`;
+  if(t.length <= 60) return "“" + t + "”";
   const first = t.split(/[.!?]/)[0].trim();
-  if(first.length <= 70) return `"${first}"`;
-  const clipped = t.substring(0,55).replace(/\s\S*$/,'');
-  return `"${clipped}\u2026"`;
+  if(first.length <= 70) return "“" + first + "”";
+  const clipped = t.substring(0,55).replace(/\s\S*$/,"");
+  return "“" + clipped + "…”";
 }
 
 // ── Scripture pool per mood ────────────────────────────────────────
 const ANCHOR_SCRIPTURES = {
-  anxious:     ['Matthew 6:34','Philippians 4:6-7','Isaiah 41:10','Psalm 94:19','1 Peter 5:7','John 14:27'],
-  discouraged: ['Isaiah 40:31','Psalm 34:18','Romans 8:28','2 Corinthians 4:8-9','Galatians 6:9','Hebrews 12:1-2'],
-  frustrated:  ['Proverbs 15:1','James 1:19-20','Psalm 37:8','Romans 12:19','Ephesians 4:26-27','Colossians 3:8'],
-  lost:        ['Proverbs 3:5-6','Psalm 32:8','Isaiah 30:21','John 16:13','Psalm 119:105','James 1:5'],
-  grateful:    ['Psalm 100:4','1 Thessalonians 5:18','Colossians 3:17','Psalm 107:1','Ephesians 5:20','Psalm 9:1'],
-  strong:      ['Joshua 1:9','2 Timothy 1:7','Philippians 4:13','Ephesians 6:10','Isaiah 40:29','1 Corinthians 16:13'],
-  other:       ['Psalm 46:10','John 14:27','Romans 8:28','Psalm 23:1','Isaiah 40:31','Proverbs 3:5-6'],
+  anxious:     ["Matthew 6:34","Philippians 4:6-7","Isaiah 41:10","Psalm 94:19","1 Peter 5:7","John 14:27"],
+  discouraged: ["Isaiah 40:31","Psalm 34:18","Romans 8:28","2 Corinthians 4:8-9","Galatians 6:9","Hebrews 12:1-2"],
+  frustrated:  ["Proverbs 15:1","James 1:19-20","Psalm 37:8","Romans 12:19","Ephesians 4:26-27","Colossians 3:8"],
+  lost:        ["Proverbs 3:5-6","Psalm 32:8","Isaiah 30:21","John 16:13","Psalm 119:105","James 1:5"],
+  grateful:    ["Psalm 100:4","1 Thessalonians 5:18","Colossians 3:17","Psalm 107:1","Ephesians 5:20","Psalm 9:1"],
+  strong:      ["Joshua 1:9","2 Timothy 1:7","Philippians 4:13","Ephesians 6:10","Isaiah 40:29","1 Corinthians 16:13"],
+  other:       ["Psalm 46:10","John 14:27","Romans 8:28","Psalm 23:1","Isaiah 40:31","Proverbs 3:5-6"],
 };
 
 function anchorPickScripture(mood){
@@ -1067,75 +1067,73 @@ function anchorPickScripture(mood){
 // ── Flows ──────────────────────────────────────────────────────────
 const ANCHOR_FLOWS = {
   other: {
-    opening: (name) => `That's okay${name ? \`, \${name}\` : ''} — you don't have to have a name for it yet.\n\nJust describe what's going on. What's happening in your life right now, or what are you feeling? Use your own words.`,
-    dig1: (r) => ``,
-    dig2: (r) => ``,
-    journalPrompt: `Write out what's going on in your own words. Don't edit yourself. Then sit and ask: "Lord, what are you trying to show me in this?"`,
-    closing: `You showed up and put words to something that didn't have a name. That's not small. Bring what came up here to prayer, to your Bible, and to someone you trust. Let God do with it what only He can.`,
+    opening: function(name){ return "That's okay" + (name ? ", " + name : "") + " — you don't have to have a name for it yet.\n\nJust describe what's going on. What's happening in your life right now, or what are you feeling? Use your own words."; },
+    dig1: function(r){ return ""; },
+    dig2: function(r){ return ""; },
+    journalPrompt: "Write out what's going on in your own words. Don't edit yourself. Then sit and ask: “Lord, what are you trying to show me in this?”",
+    closing: "You showed up and put words to something that didn't have a name. That's not small. Bring what came up here to prayer, to your Bible, and to someone you trust. Let God do with it what only He can.",
   },
   anxious: {
-    opening: (name) => `I hear you${name ? \`, \${name}\` : ''}. Anxiety has a way of filling the whole room.\n\nBefore we go anywhere — what's it actually attached to right now? Is there a specific situation, person, or decision that's sitting heavy on you?`,
-    dig1: (r) => { const e=anchorEcho(r,'what you're carrying'); return `You said ${e} — I don't want to move past that too quickly.\n\nWhen you sit with it — what's the thing you're most afraid of actually happening? Not the surface answer. The real fear underneath it.`; },
-    dig2: (r) => { const e=anchorEcho(r,'that'); return `${e}. That takes real honesty to name.\n\nOne more thing before I point you somewhere: have you been able to bring any of this to God yet, or has it mostly been a solo weight you've been carrying?`; },
-    journalPrompt: `Write out the real fear — not the polished version. The honest one. Then ask yourself: what does holding this fear say about what I believe about God right now?`,
-    closing: `You named something real today. Bring what you found here into prayer — sit with the scripture, not to solve it, but to let it speak. And if this weight is still heavy after that, it may be time to bring it to a trusted brother or your pastor. You were not meant to carry this alone.`,
+    opening: function(name){ return "I hear you" + (name ? ", " + name : "") + ". Anxiety has a way of filling the whole room.\n\nBefore we go anywhere — what's it actually attached to right now? Is there a specific situation, person, or decision that's sitting heavy on you?"; },
+    dig1: function(r){ var e=anchorEcho(r,"what you're carrying"); return "You said " + e + " — I don't want to move past that too quickly.\n\nWhen you sit with it — what's the thing you're most afraid of actually happening? Not the surface answer. The real fear underneath it."; },
+    dig2: function(r){ var e=anchorEcho(r,"that"); return e + ". That takes real honesty to name.\n\nOne more thing before I point you somewhere: have you been able to bring any of this to God yet, or has it mostly been a solo weight you've been carrying?"; },
+    journalPrompt: "Write out the real fear — not the polished version. The honest one. Then ask yourself: what does holding this fear say about what I believe about God right now?",
+    closing: "You named something real today. Bring what you found here into prayer — sit with the scripture, not to solve it, but to let it speak. And if this weight is still heavy after that, it may be time to bring it to a trusted brother or your pastor. You were not meant to carry this alone.",
   },
   discouraged: {
-    opening: (name) => `${name ? name+', d' : 'D'}iscouragement is one of the quietest forms of warfare — because it doesn't feel like a battle, it just feels like the truth.\n\nWhat happened? Or has it been building slowly over time?`,
-    dig1: (r) => { const e=anchorEcho(r,'what you shared'); return `${e} — that matters, and I want you to know I heard it.\n\nWhen you're in this place, what does the voice in your head say most? What's the story it keeps telling you about yourself?`; },
-    dig2: (r) => { const e=anchorEcho(r,'that'); return `${e}. That narrative is worth paying attention to — because that's usually where the real battle is being fought.\n\nHere's what I want to ask you gently: Is any part of you still able to believe that God is at work, even in this? Or has it become hard to see Him moving at all?`; },
-    journalPrompt: `Write down the story discouragement has been telling you. Then write what you know to be true about God — even if it doesn't feel true right now. Let those two things sit on the page together.`,
-    closing: `Discouragement often lies most convincingly right before a shift. What you named here is worth bringing to prayer and to God's word slowly — not to fix the feeling quickly, but to let truth work on it. A pastor or trusted voice can help you hear what you might be too close to hear alone right now.`,
+    opening: function(name){ return (name ? name + ", d" : "D") + "iscouragement is one of the quietest forms of warfare — because it doesn't feel like a battle, it just feels like the truth.\n\nWhat happened? Or has it been building slowly over time?"; },
+    dig1: function(r){ var e=anchorEcho(r,"what you shared"); return e + " — that matters, and I want you to know I heard it.\n\nWhen you're in this place, what does the voice in your head say most? What's the story it keeps telling you about yourself?"; },
+    dig2: function(r){ var e=anchorEcho(r,"that"); return e + ". That narrative is worth paying attention to — because that's usually where the real battle is being fought.\n\nHere's what I want to ask you gently: Is any part of you still able to believe that God is at work, even in this? Or has it become hard to see Him moving at all?"; },
+    journalPrompt: "Write down the story discouragement has been telling you. Then write what you know to be true about God — even if it doesn't feel true right now. Let those two things sit on the page together.",
+    closing: "Discouragement often lies most convincingly right before a shift. What you named here is worth bringing to prayer and to God's word slowly — not to fix the feeling quickly, but to let truth work on it. A pastor or trusted voice can help you hear what you might be too close to hear alone right now.",
   },
   frustrated: {
-    opening: (name) => `${name ? name+', f' : 'F'}rustration usually means something got violated — an expectation, a boundary, or a sense of what should be right.\n\nWhat happened? Tell me what's going on.`,
-    dig1: (r) => { const e=anchorEcho(r,'what happened'); return `${e} — I hear that. That would be hard for anyone.\n\nIf you could name the one thing that feels most wrong about it — not the whole picture, just the part that feels most unjust or disrespectful — what would that be?`; },
-    dig2: (r) => { const e=anchorEcho(r,'that'); return `${e}. That's important to name clearly.\n\nHere's a harder question, and I ask it with care: Is there anything in how you're responding — or wanting to respond — that you know doesn't line up with who you're trying to be? This isn't about who's right. It's about making sure you don't lose yourself in this.`; },
-    journalPrompt: `Write out what happened — all of it. Then write: "What do I want to do?" And then: "What does integrity ask me to do?" Let those sit next to each other.`,
-    closing: `Your frustration is valid. But how you carry it forward is yours to choose. Bring this to prayer — not just to feel better, but to ask for wisdom about what's yours to address and what's His to handle. If it involves someone specific, a conversation with a trusted voice before you respond is worth the time.`,
+    opening: function(name){ return (name ? name + ", f" : "F") + "rustration usually means something got violated — an expectation, a boundary, or a sense of what should be right.\n\nWhat happened? Tell me what's going on."; },
+    dig1: function(r){ var e=anchorEcho(r,"what happened"); return e + " — I hear that. That would be hard for anyone.\n\nIf you could name the one thing that feels most wrong about it — not the whole picture, just the part that feels most unjust or disrespectful — what would that be?"; },
+    dig2: function(r){ var e=anchorEcho(r,"that"); return e + ". That's important to name clearly.\n\nHere's a harder question, and I ask it with care: Is there anything in how you're responding — or wanting to respond — that you know doesn't line up with who you're trying to be? This isn't about who's right. It's about making sure you don't lose yourself in this."; },
+    journalPrompt: "Write out what happened — all of it. Then write: “What do I want to do?” And then: “What does integrity ask me to do?” Let those sit next to each other.",
+    closing: "Your frustration is valid. But how you carry it forward is yours to choose. Bring this to prayer — not just to feel better, but to ask for wisdom about what's yours to address and what's His to handle. If it involves someone specific, a conversation with a trusted voice before you respond is worth the time.",
   },
   lost: {
-    opening: (name) => `${name ? name+', b' : 'B'}eing lost is uncomfortable — but it usually means something in your old understanding has run out, and something new hasn't arrived yet.\n\nWhat are you trying to figure out? What's the thing that feels unclear?`,
-    dig1: (r) => { const e=anchorEcho(r,'what you described'); return `${e} — that's not a small thing to be sitting with.\n\nWhen you try to pray about it or get quiet with it — does it feel like silence from God, or more like the noise around you is too loud to hear clearly?`; },
-    dig2: (r) => { const e=anchorEcho(r,'what you said'); return `${e}. That's honest, and it matters.\n\nOne last question: Is there anything you already sense deep down — a nudge, a discomfort, a direction you keep coming back to — that you might be dismissing because it doesn't fully make sense yet?`; },
-    journalPrompt: `Write down everything you know for certain — even if it's small. Then write what you're unsure of. Then finish this sentence: "The last clear thing God said to me was…" — and start from there.`,
-    closing: `Clarity almost always comes in motion, not in waiting. Take the piece you do know and act from that. What you found in scripture today is worth sitting with slowly — read it more than once. And if the direction still won't come, bring it before God with someone who has walked with Him longer than you have.`,
+    opening: function(name){ return (name ? name + ", b" : "B") + "eing lost is uncomfortable — but it usually means something in your old understanding has run out, and something new hasn't arrived yet.\n\nWhat are you trying to figure out? What's the thing that feels unclear?"; },
+    dig1: function(r){ var e=anchorEcho(r,"what you described"); return e + " — that's not a small thing to be sitting with.\n\nWhen you try to pray about it or get quiet with it — does it feel like silence from God, or more like the noise around you is too loud to hear clearly?"; },
+    dig2: function(r){ var e=anchorEcho(r,"what you said"); return e + ". That's honest, and it matters.\n\nOne last question: Is there anything you already sense deep down — a nudge, a discomfort, a direction you keep coming back to — that you might be dismissing because it doesn't fully make sense yet?"; },
+    journalPrompt: "Write down everything you know for certain — even if it's small. Then write what you're unsure of. Then finish this sentence: “The last clear thing God said to me was…” — and start from there.",
+    closing: "Clarity almost always comes in motion, not in waiting. Take the piece you do know and act from that. What you found in scripture today is worth sitting with slowly — read it more than once. And if the direction still won't come, bring it before God with someone who has walked with Him longer than you have.",
   },
   grateful: {
-    opening: (name) => `${name ? name+', g' : 'G'}ratitude is worth pausing for — it's easy to rush past.\n\nWhat's the thing you're grateful for right now? Take a second before you type it.`,
-    dig1: (r) => { const e=anchorEcho(r,'that'); return `${e} — that's something worth marking.\n\nGratitude has a way of pointing to something deeper. What does this moment make you see about how God has been moving — even in the harder parts of getting here?`; },
-    dig2: (r) => { const e=anchorEcho(r,'what you shared'); return `${e}. That's worth holding onto carefully.\n\nIs there someone in your life who needs to hear what you just put into words? And is there anything this moment is asking you to do or be differently going forward?`; },
-    journalPrompt: `Write this moment down in detail — what happened, what you feel, what you see God doing. Then write a prayer of thanksgiving. Let it be as specific as the moment deserves.`,
-    closing: `Gratitude recorded becomes a stone of remembrance — something to return to when the next difficult season comes. Bring this to God in prayer. And if there's someone who was part of what you're grateful for, tell them. Gratitude shared multiplies.`,
+    opening: function(name){ return (name ? name + ", g" : "G") + "ratitude is worth pausing for — it's easy to rush past.\n\nWhat's the thing you're grateful for right now? Take a second before you type it."; },
+    dig1: function(r){ var e=anchorEcho(r,"that"); return e + " — that's something worth marking.\n\nGratitude has a way of pointing to something deeper. What does this moment make you see about how God has been moving — even in the harder parts of getting here?"; },
+    dig2: function(r){ var e=anchorEcho(r,"what you shared"); return e + ". That's worth holding onto carefully.\n\nIs there someone in your life who needs to hear what you just put into words? And is there anything this moment is asking you to do or be differently going forward?"; },
+    journalPrompt: "Write this moment down in detail — what happened, what you feel, what you see God doing. Then write a prayer of thanksgiving. Let it be as specific as the moment deserves.",
+    closing: "Gratitude recorded becomes a stone of remembrance — something to return to when the next difficult season comes. Bring this to God in prayer. And if there's someone who was part of what you're grateful for, tell them. Gratitude shared multiplies.",
   },
   strong: {
-    opening: (name) => `${name ? name+', c' : 'C'}larity and strength are gifts — and they carry responsibility.\n\nWhat's making you feel grounded right now? What happened, or what have you stepped into?`,
-    dig1: (r) => { const e=anchorEcho(r,'what you described'); return `${e} — that's good to hear. And I mean that.\n\nWhen you're operating from this place, what is it that God seems to be calling you toward? What's the work, the person, or the commitment this strength is meant to be poured into?`; },
-    dig2: (r) => { const e=anchorEcho(r,'that'); return `${e}. That's worth being deliberate about.\n\nOne question: Is there anything you've been putting off — a hard conversation, a decision, an act of service — that you've been waiting to feel ready for? You might be ready right now.`; },
-    journalPrompt: `Write down what you feel called to do from this place of strength. Be specific. Then write what it will cost you — and whether you're willing to pay it.`,
-    closing: `Seasons of clarity are meant to be acted on. Bring this to prayer — not to ask for permission, but to align what you're hearing with what God has already been saying. Strength without accountability tends to drift. Keep someone close who can speak truth to you in this season.`,
+    opening: function(name){ return (name ? name + ", c" : "C") + "larity and strength are gifts — and they carry responsibility.\n\nWhat's making you feel grounded right now? What happened, or what have you stepped into?"; },
+    dig1: function(r){ var e=anchorEcho(r,"what you described"); return e + " — that's good to hear. And I mean that.\n\nWhen you're operating from this place, what is it that God seems to be calling you toward? What's the work, the person, or the commitment this strength is meant to be poured into?"; },
+    dig2: function(r){ var e=anchorEcho(r,"that"); return e + ". That's worth being deliberate about.\n\nOne question: Is there anything you've been putting off — a hard conversation, a decision, an act of service — that you've been waiting to feel ready for? You might be ready right now."; },
+    journalPrompt: "Write down what you feel called to do from this place of strength. Be specific. Then write what it will cost you — and whether you're willing to pay it.",
+    closing: "Seasons of clarity are meant to be acted on. Bring this to prayer — not to ask for permission, but to align what you're hearing with what God has already been saying. Strength without accountability tends to drift. Keep someone close who can speak truth to you in this season.",
   },
 };
 
 // ── UI helpers ────────────────────────────────────────────────────
-function anchorOnTabOpen(){
-  // No auto-action needed; let the user initiate
-}
+function anchorOnTabOpen(){}
 
 function anchorSelectMood(mood){
   anchorMood = mood;
   anchorStep = 1;
-  document.getElementById('anchor-mood-picker').style.display = 'none';
-  document.getElementById('anchor-convo').style.display = 'block';
-  document.getElementById('anchor-feed').innerHTML = '';
+  document.getElementById("anchor-mood-picker").style.display = "none";
+  document.getElementById("anchor-convo").style.display = "block";
+  document.getElementById("anchor-feed").innerHTML = "";
   anchorInputEnabled = false;
 
   const flow = ANCHOR_FLOWS[mood];
-  const name = (user && user.name) ? user.name.split(' ')[0] : '';
-  anchorTypeMessage(flow.opening(name), () => {
+  const name = (user && user.name) ? user.name.split(" ")[0] : "";
+  anchorTypeMessage(flow.opening(name), function(){
     anchorInputEnabled = true;
-    anchorSetHint('No wrong answers here.');
-    document.getElementById('anchor-input').focus();
+    anchorSetHint("No wrong answers here.");
+    document.getElementById("anchor-input").focus();
   });
 }
 
@@ -1143,31 +1141,31 @@ function anchorRestart(){
   anchorMood = null;
   anchorStep = 0;
   anchorInputEnabled = false;
-  document.getElementById('anchor-mood-picker').style.display = 'block';
-  document.getElementById('anchor-convo').style.display = 'none';
-  document.getElementById('anchor-feed').innerHTML = '';
+  document.getElementById("anchor-mood-picker").style.display = "block";
+  document.getElementById("anchor-convo").style.display = "none";
+  document.getElementById("anchor-feed").innerHTML = "";
+  document.getElementById("anchor-input-area").style.display = "";
 }
 
 function anchorSetHint(text){
-  document.getElementById('anchor-hint').textContent = text;
+  document.getElementById("anchor-hint").textContent = text;
 }
 
 function anchorHandleKey(e){
-  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); anchorSend(); }
+  if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); anchorSend(); }
 }
 
 function anchorSend(){
   if(!anchorInputEnabled) return;
-  const input = document.getElementById('anchor-input');
+  const input = document.getElementById("anchor-input");
   const text = input.value.trim();
   if(!text) return;
-  input.value = '';
+  input.value = "";
   anchorInputEnabled = false;
 
-  // Add user bubble
-  const feed = document.getElementById('anchor-feed');
-  const userBubble = document.createElement('div');
-  userBubble.className = 'anchor-user-msg';
+  const feed = document.getElementById("anchor-feed");
+  const userBubble = document.createElement("div");
+  userBubble.className = "anchor-user-msg";
   userBubble.textContent = text;
   feed.appendChild(userBubble);
   feed.scrollTop = feed.scrollHeight;
@@ -1180,42 +1178,41 @@ function anchorProcessStep(userText){
   if(!flow) return;
 
   if(anchorStep === 1){
-    // "other" special case — detect mood and re-route
-    if(anchorMood === 'other'){
+    if(anchorMood === "other"){
       const detected = anchorDetectMood(userText);
       anchorMood = detected;
       const detectedFlow = ANCHOR_FLOWS[detected];
-      anchorTypeMessage(detectedFlow.dig1(userText), ()=>{
+      anchorTypeMessage(detectedFlow.dig1(userText), function(){
         anchorStep = 2;
         anchorInputEnabled = true;
-        anchorSetHint('No wrong answers here.');
+        anchorSetHint("No wrong answers here.");
       });
       return;
     }
-    anchorTypeMessage(flow.dig1(userText), ()=>{
+    anchorTypeMessage(flow.dig1(userText), function(){
       anchorStep = 2;
       anchorInputEnabled = true;
-      anchorSetHint('No wrong answers here.');
+      anchorSetHint("No wrong answers here.");
     });
 
   } else if(anchorStep === 2){
     const currentFlow = ANCHOR_FLOWS[anchorMood];
-    anchorTypeMessage(currentFlow.dig2(userText), ()=>{
+    anchorTypeMessage(currentFlow.dig2(userText), function(){
       anchorStep = 3;
       anchorInputEnabled = true;
-      anchorSetHint('Take as long as you need.');
+      anchorSetHint("Take as long as you need.");
     });
 
   } else if(anchorStep === 3){
     const currentFlow = ANCHOR_FLOWS[anchorMood];
     const ref = anchorPickScripture(anchorMood);
-    anchorTypeMessage(`Thank you for going there. Here's a scripture I want to put in front of you — not as an answer, but as a place to start.`, ()=>{
-      anchorShowScriptureCard(ref, ()=>{
-        setTimeout(()=>{
-          anchorTypeMessage(`Sit with that for a moment.\n\n${currentFlow.journalPrompt}\n\nWrite what comes up — this is between you and God.`, ()=>{
+    anchorTypeMessage("Thank you for going there. Here's a scripture I want to put in front of you — not as an answer, but as a place to start.", function(){
+      anchorShowScriptureCard(ref, function(){
+        setTimeout(function(){
+          anchorTypeMessage("Sit with that for a moment.\n\n" + currentFlow.journalPrompt + "\n\nWrite what comes up — this is between you and God.", function(){
             anchorStep = 4;
             anchorInputEnabled = true;
-            anchorSetHint('Write as much as you need — then send when ready.');
+            anchorSetHint("Write as much as you need — then send when ready.");
           });
         }, 600);
       });
@@ -1223,20 +1220,19 @@ function anchorProcessStep(userText){
 
   } else if(anchorStep === 4){
     const currentFlow = ANCHOR_FLOWS[anchorMood];
-    // Save to WWJ journal
     if(userText && userText.length > 2){
       const entry = {
         id: Date.now(),
         date: new Date().toISOString(),
         mood: anchorMood,
         text: userText,
-        source: 'companion'
+        source: "companion"
       };
       journalEntries.unshift(entry);
-      localStorage.setItem(JOURNAL_KEY, JSON.stringify(journalEntries));
+      try{ localStorage.setItem(JOURNAL_KEY, JSON.stringify(journalEntries)); }catch(e){}
     }
-    anchorTypeMessage(`I hear you.`, ()=>{
-      setTimeout(()=>{
+    anchorTypeMessage("I hear you.", function(){
+      setTimeout(function(){
         anchorShowClosingCard(currentFlow.closing);
         anchorStep = 5;
       }, 400);
@@ -1245,21 +1241,19 @@ function anchorProcessStep(userText){
 }
 
 function anchorTypeMessage(text, onDone){
-  const feed = document.getElementById('anchor-feed');
-  // Typing indicator
-  const indicator = document.createElement('div');
-  indicator.className = 'anchor-companion-msg anchor-typing';
-  indicator.innerHTML = '<span></span><span></span><span></span>';
+  const feed = document.getElementById("anchor-feed");
+  const indicator = document.createElement("div");
+  indicator.className = "anchor-companion-msg anchor-typing";
+  indicator.innerHTML = "<span></span><span></span><span></span>";
   feed.appendChild(indicator);
   feed.scrollTop = feed.scrollHeight;
 
   const delay = Math.min(600 + text.length * 18, 2800);
-  setTimeout(()=>{
+  setTimeout(function(){
     indicator.remove();
-    const msg = document.createElement('div');
-    msg.className = 'anchor-companion-msg';
-    // Convert \n\n to paragraphs
-    msg.innerHTML = text.split('\n\n').map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+    const msg = document.createElement("div");
+    msg.className = "anchor-companion-msg";
+    msg.innerHTML = text.split("\n\n").map(function(p){ return "<p>" + p.replace(/\n/g,"<br>") + "</p>"; }).join("");
     feed.appendChild(msg);
     feed.scrollTop = feed.scrollHeight;
     if(onDone) onDone();
@@ -1267,40 +1261,36 @@ function anchorTypeMessage(text, onDone){
 }
 
 async function anchorShowScriptureCard(ref, onDone){
-  const feed = document.getElementById('anchor-feed');
-  const card = document.createElement('div');
-  card.className = 'anchor-scripture-card';
-  card.innerHTML = `<div class="anchor-script-ref">${ref}</div><div class="anchor-script-text">Loading…</div>`;
+  const feed = document.getElementById("anchor-feed");
+  const card = document.createElement("div");
+  card.className = "anchor-scripture-card";
+  card.innerHTML = "<div class=\"anchor-script-ref\">" + ref + "</div><div class=\"anchor-script-text\">Loading…</div>";
   feed.appendChild(card);
   feed.scrollTop = feed.scrollHeight;
 
   try {
-    const translation = (user && user.translation) || 'web';
-    const res = await fetch(`https://bible-api.com/${encodeURIComponent(ref)}?translation=${translation}`);
+    const translation = (user && user.translation) || "web";
+    const res = await fetch("https://bible-api.com/" + encodeURIComponent(ref) + "?translation=" + translation);
     const data = await res.json();
     if(data && data.text){
-      card.querySelector('.anchor-script-ref').textContent = data.reference;
-      card.querySelector('.anchor-script-text').textContent = data.text.trim();
+      card.querySelector(".anchor-script-ref").textContent = data.reference;
+      card.querySelector(".anchor-script-text").textContent = data.text.trim();
     }
   } catch(e) {
-    card.querySelector('.anchor-script-text').textContent = 'Could not load verse. Look it up in your Bible.';
+    card.querySelector(".anchor-script-text").textContent = "Could not load verse. Look it up in your Bible.";
   }
   feed.scrollTop = feed.scrollHeight;
   if(onDone) onDone();
 }
 
 function anchorShowClosingCard(closingText){
-  const feed = document.getElementById('anchor-feed');
-  const card = document.createElement('div');
-  card.className = 'anchor-closing-card';
-  card.innerHTML = `
-    <div class="anchor-closing-icon">✦</div>
-    <div class="anchor-closing-text">${closingText}</div>
-    <button class="anchor-restart-inline" onclick="anchorRestart()">Start a new conversation</button>
-  `;
+  const feed = document.getElementById("anchor-feed");
+  const card = document.createElement("div");
+  card.className = "anchor-closing-card";
+  card.innerHTML = "<div class=\"anchor-closing-icon\">✦</div><div class=\"anchor-closing-text\">" + closingText + "</div><button class=\"anchor-restart-inline\" onclick=\"anchorRestart()\">Start a new conversation</button>";
   feed.appendChild(card);
   feed.scrollTop = feed.scrollHeight;
-  document.getElementById('anchor-input-area').style.display = 'none';
+  document.getElementById("anchor-input-area").style.display = "none";
 }
 // ════ END COMPANION ENGINE ════════════════════════════════════════
 
