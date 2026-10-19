@@ -1206,6 +1206,7 @@ function anchorProcessStep(userText){
   } else if(anchorStep === 3){
     const currentFlow = ANCHOR_FLOWS[anchorMood];
     const ref = anchorPickScripture(anchorMood);
+    anchorLastScripture = ref;
     anchorTypeMessage("Thank you for going there. Here's a scripture I want to put in front of you — not as an answer, but as a place to start.", function(){
       anchorShowScriptureCard(ref, function(){
         setTimeout(function(){
@@ -1233,9 +1234,44 @@ function anchorProcessStep(userText){
     }
     anchorTypeMessage("I hear you.", function(){
       setTimeout(function(){
-        anchorShowClosingCard(currentFlow.closing);
+        // Show closing word, then keep conversation open
+        anchorShowClosingWord(currentFlow.closing);
         anchorStep = 5;
+        // After a pause, offer to keep talking
+        setTimeout(function(){
+          var followUp = anchorFollowUp1(anchorMood, anchorLastScripture);
+          anchorTypeMessage(followUp, function(){
+            anchorInputEnabled = true;
+            anchorSetHint("Share what came up — or ask anything.");
+            document.getElementById("anchor-input-area").style.display = "";
+          });
+        }, 1200);
       }, 400);
+    });
+
+  } else if(anchorStep === 5){
+    // First follow-up response
+    anchorTypeMessage(anchorFollowUp2(anchorMood, userText), function(){
+      anchorStep = 6;
+      anchorInputEnabled = true;
+      anchorSetHint("Keep going — there are no wrong turns here.");
+    });
+
+  } else if(anchorStep === 6){
+    // Second follow-up response
+    anchorTypeMessage(anchorFollowUp3(anchorMood, userText), function(){
+      anchorStep = 7;
+      anchorInputEnabled = true;
+      anchorSetHint("One more thought if you have it.");
+    });
+
+  } else if(anchorStep === 7){
+    // Gentle close
+    var name = (user && user.name) ? user.name.split(" ")[0] : "";
+    var closeMsg = "What you brought here today mattered" + (name ? ", " + name : "") + ". Don’t let it stay only in this conversation. Take it to God in prayer, sit with that scripture again tonight, and if someone comes to mind who you trust — reach out to them.\n\nI’m here whenever you need to think something through.";
+    anchorTypeMessage(closeMsg, function(){
+      anchorStep = 8;
+      anchorShowRestartOption();
     });
   }
 }
