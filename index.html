@@ -981,11 +981,26 @@ function renderTensions(){
       :gap>25
       ?`${p.a} (${sa}) is leading ${p.b} (${sb}). This is a natural lean — but worth watching. The lower value may be asking for more attention than it's getting.`
       :`${p.a} and ${p.b} are fairly balanced at ${sa} and ${sb}. This harmony is worth protecting. Notice what makes it possible.`;
+    const balancedSuggestions={
+      "Faith+Love":"Faith and Love reinforce each other — love expressed toward others is often faith in action. Look for one moment today where they overlap.",
+      "Love+Faith":"Faith and Love reinforce each other — love expressed toward others is often faith in action. Look for one moment today where they overlap.",
+      "Faith+Integrity":"When what you believe and how you act align, trust grows — in yourself and others. Name one commitment this week you can keep without compromise.",
+      "Integrity+Faith":"When what you believe and how you act align, trust grows — in yourself and others. Name one commitment this week you can keep without compromise.",
+      "Faith+Courage":"Courage often starts where faith is tested. Think of one thing you've been avoiding — then ask what faith asks of you there.",
+      "Courage+Faith":"Courage often starts where faith is tested. Think of one thing you've been avoiding — then ask what faith asks of you there.",
+      "Love+Integrity":"Caring about people and being honest with them can create tension. The question isn't which one wins — it's how to honor both in the same moment.",
+      "Integrity+Love":"Caring about people and being honest with them can create tension. The question isn't which one wins — it's how to honor both in the same moment.",
+      "Love+Courage":"Sometimes love requires a hard conversation. Is there someone in your life who needs your honesty more than your comfort right now?",
+      "Courage+Love":"Sometimes love requires a hard conversation. Is there someone in your life who needs your honesty more than your comfort right now?",
+      "Integrity+Courage":"Integrity without courage stays silent. Courage without integrity can be reckless. Where do you need to speak up this week?",
+      "Courage+Integrity":"Integrity without courage stays silent. Courage without integrity can be reckless. Where do you need to speak up this week?"
+    };
+    const pairKey=p.a+"+"+p.b;
     const suggest=gap>50
       ?`Take 10 minutes this week to specifically invest in ${sa<sb?p.a:p.b}. Even a small intentional act in that direction can start to close the gap.`
       :gap>25
       ?`Ask yourself: in what one area of my life could I express ${sa<sb?p.a:p.b} more fully this week?`
-      :`Keep a simple check: at the end of each day, did you live both values — even once? Consistency is what builds character.`;
+      :(balancedSuggestions[pairKey]||`These two values are in balance right now. Think about how ${p.a} and ${p.b} could work together — not compete — in a decision you're facing this week.`);
     return`<div class="tension-block">
       <div class="tension-labels">
         <span style="font-size:13px;font-weight:500;color:${p.ca}">${p.a} <span style="font-size:11px;opacity:.7">${sa}</span></span>
