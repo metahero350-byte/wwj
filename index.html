@@ -462,7 +462,7 @@ textarea:focus{border-color:rgba(201,151,58,.5)}
       <div class="add-scripture-card">
         <div class="card-label">Look up a scripture</div>
         <div class="lookup-row">
-          <input type="text" class="lookup-input" id="lookupRef" placeholder="e.g. John 3:16 or Psalm 23:1" style="margin-bottom:0"/>
+          <input type="text" class="lookup-input" id="lookupRef" placeholder="e.g. Ezekiel 37:1 or Job 1:21" style="margin-bottom:0" onkeydown="if(event.key==='Enter')lookupScripture()"/>
           <button class="lookup-btn" onclick="lookupScripture()">Find</button>
         </div>
         <div id="lookupStatus" style="font-size:12px;color:var(--muted);margin-bottom:8px;min-height:16px"></div>
@@ -724,7 +724,14 @@ function switchTab(tab){
 
 async function loadDailyVerse(){
   const el=document.getElementById('dailyVerse');
-  const refs=['John 3:16','Psalm 46:10','Isaiah 40:31','Romans 8:28','Proverbs 3:5','Matthew 11:28'];
+  const refs=[
+    'John 3:16','Psalm 46:10','Isaiah 40:31','Romans 8:28','Proverbs 3:5','Matthew 11:28',
+    'Jeremiah 29:11','Psalm 23:1','Joshua 1:9','Lamentations 3:22-23','Job 19:25','Ezekiel 36:26',
+    'Philippians 4:13','2 Timothy 1:7','Hebrews 11:1','James 1:2-3','1 Peter 5:7','Romans 5:3-4',
+    'Nahum 1:7','Zephaniah 3:17','Habakkuk 2:3','Micah 6:8','Hosea 6:3','Daniel 10:19',
+    'Psalm 34:18','Psalm 119:105','Psalm 18:2','Proverbs 16:9','Ecclesiastes 3:1','Isaiah 26:3',
+    'Ruth 1:16','Nehemiah 8:10','Acts 1:8','Colossians 3:17','Revelation 21:4','Psalm 100:4'
+  ];
   const today=new Date().toDateString();
   const idx=Math.abs([...today].reduce((a,c)=>a+c.charCodeAt(0),0))%refs.length;
   try{
@@ -761,7 +768,7 @@ async function lookupScripture(){
       lookupTags=[];
       document.querySelectorAll('#moodTags .tag-chip').forEach(c=>c.classList.remove('sel'));
     } else {
-      status.textContent='Could not find that reference. Try "John 3:16" or "Psalm 23:1-3".';
+      status.innerHTML='Not found. Try the full book name: <em>Ezekiel 37:1</em>, <em>Job 1:1</em>, <em>1 Kings 3:9</em>';
     }
   }catch(e){status.textContent='Could not connect. Check your internet and try again.';}
 }
@@ -1066,13 +1073,48 @@ function anchorEcho(text, fallback){
 
 // ── Scripture pool per mood ────────────────────────────────────────
 const ANCHOR_SCRIPTURES = {
-  anxious:     ["Matthew 6:34","Philippians 4:6-7","Isaiah 41:10","Psalm 94:19","1 Peter 5:7","John 14:27"],
-  discouraged: ["Isaiah 40:31","Psalm 34:18","Romans 8:28","2 Corinthians 4:8-9","Galatians 6:9","Hebrews 12:1-2"],
-  frustrated:  ["Proverbs 15:1","James 1:19-20","Psalm 37:8","Romans 12:19","Ephesians 4:26-27","Colossians 3:8"],
-  lost:        ["Proverbs 3:5-6","Psalm 32:8","Isaiah 30:21","John 16:13","Psalm 119:105","James 1:5"],
-  grateful:    ["Psalm 100:4","1 Thessalonians 5:18","Colossians 3:17","Psalm 107:1","Ephesians 5:20","Psalm 9:1"],
-  strong:      ["Joshua 1:9","2 Timothy 1:7","Philippians 4:13","Ephesians 6:10","Isaiah 40:29","1 Corinthians 16:13"],
-  other:       ["Psalm 46:10","John 14:27","Romans 8:28","Psalm 23:1","Isaiah 40:31","Proverbs 3:5-6"],
+  anxious: [
+    "Matthew 6:34","Philippians 4:6-7","Isaiah 41:10","Psalm 94:19","1 Peter 5:7","John 14:27",
+    "Psalm 23:1-4","Psalm 56:3","Isaiah 26:3","Romans 8:15","2 Timothy 1:7","Lamentations 3:22-23",
+    "Zephaniah 3:17","Nahum 1:7","Job 3:25-26","Ezekiel 34:16","Luke 12:7","Deuteronomy 31:8",
+    "Psalm 46:1-3","Proverbs 12:25"
+  ],
+  discouraged: [
+    "Isaiah 40:31","Psalm 34:18","Romans 8:28","2 Corinthians 4:8-9","Galatians 6:9","Hebrews 12:1-2",
+    "Job 8:20-21","Psalm 42:11","Jeremiah 29:11","Micah 7:7-8","Revelation 21:4","John 16:33",
+    "Psalm 30:5","Romans 5:3-4","2 Corinthians 12:9","Isaiah 43:2","Habakkuk 3:17-18",
+    "Psalm 126:5-6","Ezekiel 37:3-5","1 Kings 19:5-7"
+  ],
+  frustrated: [
+    "Proverbs 15:1","James 1:19-20","Psalm 37:8","Romans 12:19","Ephesians 4:26-27","Colossians 3:8",
+    "Proverbs 19:11","Ecclesiastes 7:9","Job 40:4","Psalm 4:4","Numbers 14:18","Lamentations 3:39-40",
+    "Micah 6:8","Romans 12:17-18","Matthew 5:9","1 Samuel 24:12","Ezekiel 18:30",
+    "Proverbs 14:29","Hebrews 12:14-15","James 3:17-18"
+  ],
+  lost: [
+    "Proverbs 3:5-6","Psalm 32:8","Isaiah 30:21","John 16:13","Psalm 119:105","James 1:5",
+    "Jeremiah 6:16","Isaiah 42:16","Psalm 25:4-5","John 10:3-4","Ezekiel 34:11-12","Ruth 1:16",
+    "Psalm 37:23","Acts 17:27-28","Romans 8:14","Isaiah 48:17","Job 23:10",
+    "Proverbs 16:9","Genesis 28:15","Deuteronomy 30:19-20"
+  ],
+  grateful: [
+    "Psalm 100:4","1 Thessalonians 5:18","Colossians 3:17","Psalm 107:1","Ephesians 5:20","Psalm 9:1",
+    "Psalm 136:1","Daniel 2:23","Nehemiah 8:10","Psalm 118:24","Habakkuk 3:18","Isaiah 12:4-5",
+    "Revelation 7:12","Luke 17:15-16","Psalm 92:1-2","1 Chronicles 16:34","Job 1:21",
+    "Ezra 3:11","Jonah 2:9","Psalm 34:1-3"
+  ],
+  strong: [
+    "Joshua 1:9","2 Timothy 1:7","Philippians 4:13","Ephesians 6:10","Isaiah 40:29","1 Corinthians 16:13",
+    "Deuteronomy 20:4","Psalm 18:32-33","Nehemiah 8:10","Daniel 10:19","Joel 3:10","Zechariah 4:6",
+    "2 Samuel 22:33","Ezekiel 3:8-9","Job 17:9","Romans 8:37","Psalm 31:24",
+    "Isaiah 54:17","Colossians 1:11","Acts 4:31"
+  ],
+  other: [
+    "Psalm 46:10","John 14:27","Romans 8:28","Psalm 23:1","Isaiah 40:31","Proverbs 3:5-6",
+    "Lamentations 3:22-23","Ecclesiastes 3:1","Job 42:2","Ezekiel 36:26","Malachi 3:10",
+    "Amos 5:24","Hosea 6:3","Micah 5:2","Obadiah 1:3-4","Jonah 2:7","Nahum 1:7",
+    "Habakkuk 2:3","Zephaniah 3:17","Haggai 2:4"
+  ],
 };
 
 function anchorPickScripture(mood){
